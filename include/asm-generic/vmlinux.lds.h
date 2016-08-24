@@ -216,9 +216,12 @@
 
 /*
  * .data section
+ * -fdata-sections generates .data.identifier which needs to be pulled in
+ * with .data, but don't want to pull in .data..stuff which has its own
+ * requirements. Same for bss.
  */
 #define DATA_DATA							\
-	*(DATA_MAIN)							\
+	*(.data .data.[0-9a-zA-Z_]*)					\
 	*(.ref.data)							\
 	*(.data..shared_aligned) /* percpu related */			\
 	MEM_KEEP(init.data)						\
@@ -461,9 +464,7 @@
  */
 #define TEXT_TEXT							\
 		ALIGN_FUNCTION();					\
-		*(.text.hot TEXT_MAIN .text.fixup .text.unlikely)	\
-		*(.text..ftrace)					\
-		*(TEXT_CFI_MAIN) 					\
+		*(.text.hot .text .text.fixup .text.unlikely .text.*)	\
 		*(.ref.text)						\
 	MEM_KEEP(init.text)						\
 	MEM_KEEP(exit.text)						\
@@ -623,7 +624,7 @@
 		BSS_FIRST_SECTIONS					\
 		*(.bss..page_aligned)					\
 		*(.dynbss)						\
-		*(BSS_MAIN)						\
+		*(.bss .bss.[0-9a-zA-Z_]*)				\
 		*(COMMON)						\
 	}
 
