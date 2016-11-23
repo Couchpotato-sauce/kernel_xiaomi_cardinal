@@ -587,24 +587,18 @@ $($(subst $(obj)/,,$(@:.o=-m)))), $^)
 
 cmd_link_multi-link = $(LD) $(ld_flags) -r -o $@ $(link_multi_deps) $(cmd_secanalysis)
 
+cmd_link_multi-link = $(LD) $(ld_flags) -r -o $@ $(link_multi_deps) $(cmd_secanalysis)
+
 ifdef CONFIG_THIN_ARCHIVES
   quiet_cmd_link_multi-y = AR      $@
-  cmd_link_multi-y = $(update_lto_symversions) \
-	rm -f $@; $(AR) rcSTP$(KBUILD_ARFLAGS) $@ $(link_multi_deps) \
-	$(update_lto_symtable)
+  cmd_link_multi-y = rm -f $@; $(AR) rcST$(KBUILD_ARFLAGS) $@ $(link_multi_deps)
 else
   quiet_cmd_link_multi-y = LD      $@
   cmd_link_multi-y = $(cmd_link_multi-link)
 endif
 
 quiet_cmd_link_multi-m = LD [M]  $@
-
-ifdef CONFIG_LTO_CLANG
-  # don't compile IR until needed
-  cmd_link_multi-m = $(cmd_link_multi-y)
-else
-  cmd_link_multi-m = $(cmd_link_multi-link)
-endif
+cmd_link_multi-m = $(cmd_link_multi-link)
 
 $(multi-used-y): FORCE
 	$(call if_changed,link_multi-y)
