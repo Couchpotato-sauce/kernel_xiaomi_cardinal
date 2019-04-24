@@ -115,7 +115,14 @@
 
 #include <asm/sysreg.h>
 
-#define read_cpuid(reg)			read_sysreg_s(SYS_ ## reg)
+#define read_cpuid(reg) ({						\
+	u64 __val;							\
+	asm(DEFINE_MRS_S						\
+		"mrs_s	%0, " __stringify(reg) "\n"			\
+		UNDEFINE_MRS_S						\
+		: "=r" (__val));					\
+	__val;								\
+})
 
 /*
  * The CPU ID never changes at run time, so we might as well tell the

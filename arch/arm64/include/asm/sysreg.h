@@ -274,15 +274,20 @@
 #define UNDEFINE_MSR_S						\
 "	.purgem	msr_s\n"
 
-#define __mrs_s(r, v)						\
-	DEFINE_MRS_S						\
-"	mrs_s %0, " __stringify(r) "\n"				\
-	UNDEFINE_MRS_S : "=r" (v)
+#define UNDEFINE_MRS_S						\
+"	.purgem	mrs_s\n"
 
-#define __msr_s(r, v)						\
-	DEFINE_MSR_S						\
-"	msr_s " __stringify(r) ", %x0\n"			\
-	UNDEFINE_MSR_S : : "rZ" (v)
+	asm volatile(DEFINE_MRS_S
+		"mrs %0, sctlr_el1\n"
+		UNDEFINE_MRS_S
+		: "=r" (val));
+	val &= ~clear;
+	val |= set;
+	asm volatile(DEFINE_MSR_S
+		"msr sctlr_el1, %0\n"
+		UNDEFINE_MSR_S
+		: : "r" (val));
+}
 
 /*
  * Unlike read_cpuid, calls to read_sysreg are never expected to be
